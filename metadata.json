@@ -1,0 +1,6 @@
+{
+  "name": "PhishShield: Explainable ML Phishing URL Detection & Cyber Awareness",
+  "description": "An explainable ML-based phishing URL risk assessment platform featuring XGBoost, SHAP feature attribution, threat analytics, and interactive cyber defense education.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
