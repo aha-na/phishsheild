@@ -89,3 +89,21 @@ export interface GlobalFeatureImportance {
   category: 'Lexical' | 'Structural' | 'Protocol' | 'Token';
   description: string;
 }
+
+export interface TechStackLayer {
+  layer: string;
+  technology: string;
+  details: string;
+  badgeColor: string;
+}
+
+export interface DatasetMetadata {
+  name: string;
+  totalInstances: number;
+  legitimateCount: number;
+  phishingCount: number;
+  totalFeatures: number;
+  selectedUrlFeatures: number;
+  designRationale: string;
+}
+

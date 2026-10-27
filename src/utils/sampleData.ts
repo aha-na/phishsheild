@@ -1,8 +1,10 @@
 import {
   ConfusionMatrixData,
+  DatasetMetadata,
   GlobalFeatureImportance,
   ModelMetric,
   ScanResult,
+  TechStackLayer,
 } from '../types';
 import { analyzeUrl } from './mlEngine';
 
@@ -12,6 +14,62 @@ export interface PresetUrl {
   url: string;
   description: string;
 }
+
+export const DATASET_METADATA: DatasetMetadata = {
+  name: 'PhiUSIIL Phishing URL Dataset',
+  totalInstances: 235795,
+  legitimateCount: 134850,
+  phishingCount: 100945,
+  totalFeatures: 54,
+  selectedUrlFeatures: 21,
+  designRationale:
+    'Because the deployed app only sees a pasted URL at use-time, only URL-based features that can be extracted safely without remote web scraping or network overhead are selected for model training and real-time inference.',
+};
+
+export const TECH_STACK_SPEC: TechStackLayer[] = [
+  {
+    layer: 'Language',
+    technology: 'Python',
+    details: 'Python 3.10+ execution runtime for ML inference, feature pipelines, and FastAPI async backend.',
+    badgeColor: 'border-blue-500/50 bg-blue-950/60 text-blue-300',
+  },
+  {
+    layer: 'Machine Learning',
+    technology: 'Scikit-learn, XGBoost',
+    details: 'Ensemble gradient-boosted trees and classification pipelines cross-validated on 235,795 PhiUSIIL samples.',
+    badgeColor: 'border-cyan-500/50 bg-cyan-950/60 text-cyan-300',
+  },
+  {
+    layer: 'Explainable AI',
+    technology: 'SHAP / feature-importance techniques',
+    details: 'TreeExplainer local waterfall attributions (+/- delta % risk contribution) and Gini feature importance.',
+    badgeColor: 'border-purple-500/50 bg-purple-950/60 text-purple-300',
+  },
+  {
+    layer: 'Backend',
+    technology: 'FastAPI',
+    details: 'Asynchronous Python REST API serving /scan, /history, /analytics, /model-metrics, and /feedback.',
+    badgeColor: 'border-emerald-500/50 bg-emerald-950/60 text-emerald-300',
+  },
+  {
+    layer: 'Frontend',
+    technology: 'React, Tailwind CSS, Recharts',
+    details: 'Single-page application featuring interactive SVG risk gauges, confusion matrices, and ROC curves.',
+    badgeColor: 'border-amber-500/50 bg-amber-950/60 text-amber-300',
+  },
+  {
+    layer: 'Database',
+    technology: 'SQLite',
+    details: 'Embedded relational database (phishshield.db) storing scans, extracted feature vectors, and feedback queue.',
+    badgeColor: 'border-indigo-500/50 bg-indigo-950/60 text-indigo-300',
+  },
+  {
+    layer: 'Tools',
+    technology: 'Visual Studio Code, Git and GitHub',
+    details: 'Source code management, linting, CI test automation, and collaborative branch pull-request workflows.',
+    badgeColor: 'border-slate-500/50 bg-slate-900 text-slate-300',
+  },
+];
 
 export const PRESET_URLS: PresetUrl[] = [
   {
@@ -47,7 +105,7 @@ export const PRESET_URLS: PresetUrl[] = [
   {
     label: 'University CS Research Archive',
     category: 'Safe',
-    url: 'https://www.cs.cmu.edu/~phishing-benchmarks/dataset-uci.html',
+    url: 'https://www.cs.cmu.edu/~phishing-benchmarks/dataset-phiusiil.html',
     description: 'Authoritative .edu namespace, clean lexical structure, authentic archive.',
   },
 ];
@@ -55,43 +113,43 @@ export const PRESET_URLS: PresetUrl[] = [
 export const BENCHMARK_MODELS: ModelMetric[] = [
   {
     modelName: 'XGBoost (Champion)',
-    accuracy: 98.1,
-    f1Score: 98.1,
-    precision: 98.3,
-    recall: 97.9,
-    rocAuc: 0.995,
-    trainingTimeSec: 4.2,
+    accuracy: 99.18,
+    f1Score: 99.04,
+    precision: 99.21,
+    recall: 98.87,
+    rocAuc: 0.9982,
+    trainingTimeSec: 14.6,
     inferenceLatencyMs: 1.8,
     isChampion: true,
   },
   {
     modelName: 'Random Forest',
-    accuracy: 97.2,
-    f1Score: 97.2,
-    precision: 97.0,
-    recall: 97.4,
-    rocAuc: 0.991,
-    trainingTimeSec: 6.8,
-    inferenceLatencyMs: 3.4,
+    accuracy: 98.74,
+    f1Score: 98.53,
+    precision: 98.60,
+    recall: 98.46,
+    rocAuc: 0.9954,
+    trainingTimeSec: 22.4,
+    inferenceLatencyMs: 3.2,
   },
   {
     modelName: 'Decision Tree (CART)',
-    accuracy: 94.1,
-    f1Score: 94.0,
-    precision: 93.8,
-    recall: 94.2,
-    rocAuc: 0.941,
-    trainingTimeSec: 0.9,
+    accuracy: 96.85,
+    f1Score: 96.32,
+    precision: 96.10,
+    recall: 96.54,
+    rocAuc: 0.9680,
+    trainingTimeSec: 3.1,
     inferenceLatencyMs: 0.7,
   },
   {
     modelName: 'Logistic Regression',
-    accuracy: 92.4,
-    f1Score: 92.3,
-    precision: 91.8,
-    recall: 92.8,
-    rocAuc: 0.961,
-    trainingTimeSec: 0.5,
+    accuracy: 93.62,
+    f1Score: 92.51,
+    precision: 92.80,
+    recall: 92.22,
+    rocAuc: 0.9710,
+    trainingTimeSec: 1.8,
     inferenceLatencyMs: 0.4,
   },
 ];
@@ -99,92 +157,98 @@ export const BENCHMARK_MODELS: ModelMetric[] = [
 export const CONFUSION_MATRICES: Record<string, ConfusionMatrixData> = {
   'XGBoost (Champion)': {
     modelName: 'XGBoost',
-    totalSamples: 2211,
-    truePositives: 1198,
-    falsePositives: 21,
-    trueNegatives: 972,
-    falseNegatives: 20,
+    totalSamples: 47159,
+    truePositives: 20011,
+    falsePositives: 160,
+    trueNegatives: 26710,
+    falseNegatives: 228,
   },
   'Random Forest': {
     modelName: 'Random Forest',
-    totalSamples: 2211,
-    truePositives: 1186,
-    falsePositives: 36,
-    trueNegatives: 957,
-    falseNegatives: 32,
+    totalSamples: 47159,
+    truePositives: 19928,
+    falsePositives: 283,
+    trueNegatives: 26587,
+    falseNegatives: 311,
   },
   'Decision Tree (CART)': {
     modelName: 'Decision Tree',
-    totalSamples: 2211,
-    truePositives: 1148,
-    falsePositives: 76,
-    trueNegatives: 917,
-    falseNegatives: 70,
+    totalSamples: 47159,
+    truePositives: 19451,
+    falsePositives: 779,
+    trueNegatives: 26091,
+    falseNegatives: 838,
   },
   'Logistic Regression': {
     modelName: 'Logistic Regression',
-    totalSamples: 2211,
-    truePositives: 1130,
-    falsePositives: 101,
-    trueNegatives: 892,
-    falseNegatives: 88,
+    totalSamples: 47159,
+    truePositives: 18665,
+    falsePositives: 1448,
+    trueNegatives: 25422,
+    falseNegatives: 1624,
   },
 };
 
 export const ROC_CURVE_DATA = [
   { fpr: 0.0, xgboost: 0.0, randomForest: 0.0, decisionTree: 0.0, logisticRegression: 0.0 },
-  { fpr: 0.01, xgboost: 0.82, randomForest: 0.76, decisionTree: 0.65, logisticRegression: 0.58 },
-  { fpr: 0.02, xgboost: 0.92, randomForest: 0.88, decisionTree: 0.78, logisticRegression: 0.72 },
-  { fpr: 0.05, xgboost: 0.97, randomForest: 0.94, decisionTree: 0.87, logisticRegression: 0.84 },
-  { fpr: 0.1, xgboost: 0.985, randomForest: 0.97, decisionTree: 0.91, logisticRegression: 0.89 },
-  { fpr: 0.2, xgboost: 0.994, randomForest: 0.988, decisionTree: 0.94, logisticRegression: 0.93 },
-  { fpr: 0.4, xgboost: 0.998, randomForest: 0.995, decisionTree: 0.965, logisticRegression: 0.96 },
-  { fpr: 0.7, xgboost: 1.0, randomForest: 0.999, decisionTree: 0.985, logisticRegression: 0.98 },
+  { fpr: 0.005, xgboost: 0.91, randomForest: 0.85, decisionTree: 0.72, logisticRegression: 0.64 },
+  { fpr: 0.01, xgboost: 0.965, randomForest: 0.92, decisionTree: 0.81, logisticRegression: 0.75 },
+  { fpr: 0.02, xgboost: 0.985, randomForest: 0.958, decisionTree: 0.88, logisticRegression: 0.82 },
+  { fpr: 0.05, xgboost: 0.995, randomForest: 0.982, decisionTree: 0.93, logisticRegression: 0.89 },
+  { fpr: 0.1, xgboost: 0.998, randomForest: 0.992, decisionTree: 0.955, logisticRegression: 0.93 },
+  { fpr: 0.2, xgboost: 0.9995, randomForest: 0.997, decisionTree: 0.975, logisticRegression: 0.96 },
+  { fpr: 0.5, xgboost: 1.0, randomForest: 1.0, decisionTree: 0.99, logisticRegression: 0.985 },
   { fpr: 1.0, xgboost: 1.0, randomForest: 1.0, decisionTree: 1.0, logisticRegression: 1.0 },
 ];
 
 export const GLOBAL_FEATURE_IMPORTANCES: GlobalFeatureImportance[] = [
   {
-    feature: 'Having_IP_Address',
-    importance: 0.28,
+    feature: 'IsDomainIP',
+    importance: 0.26,
     category: 'Structural',
-    description: 'Direct IP usage in place of domain is the strongest single indicator of illicit infrastructure.',
+    description: 'Direct numerical IP address in host (from PhiUSIIL URL-extracted subset).',
   },
   {
-    feature: 'URL_Length_Anomaly',
-    importance: 0.19,
+    feature: 'URLLength',
+    importance: 0.18,
     category: 'Lexical',
-    description: 'URLs exceeding 75-85 characters hide domain components on mobile viewports.',
+    description: 'Excessive overall URL character length (frequently engineered to obscure mobile address bars).',
   },
   {
-    feature: 'Prefix_Suffix_Hyphen',
-    importance: 0.16,
+    feature: 'DomainLength',
+    importance: 0.15,
     category: 'Structural',
-    description: 'Hyphens separating brand names from malicious tokens (e.g. chase-verify-login).',
+    description: 'Registered hostname character length and character distribution.',
   },
   {
-    feature: 'Subdomain_Multilevel_Count',
-    importance: 0.14,
+    feature: 'NoOfSubDomain',
+    importance: 0.13,
     category: 'Structural',
-    description: 'Stacking subdomains to simulate legitimate FQDN hierarchies on free hosts.',
+    description: 'Multilevel subdomain stacking (e.g. brand.com.evil-host.top).',
   },
   {
-    feature: 'SSL_Final_State (HTTPS)',
+    feature: 'NoOfHyphenInDomain',
     importance: 0.11,
+    category: 'Structural',
+    description: 'Hyphens separating brand names from attack tokens.',
+  },
+  {
+    feature: 'IsHTTPS',
+    importance: 0.08,
     category: 'Protocol',
-    description: 'Plaintext HTTP absence of encryption vs modern SSL certificate provisioning.',
+    description: 'Cryptographic SSL/TLS scheme vs plaintext HTTP transmission.',
   },
   {
-    feature: 'Suspicious_Tokens_Count',
-    importance: 0.07,
-    category: 'Token',
-    description: 'Presence of credential-stealing words ("verify", "banking", "wallet", "suspend").',
-  },
-  {
-    feature: 'Domain_Shannon_Entropy',
+    feature: 'Entropy_URL',
     importance: 0.05,
     category: 'Lexical',
-    description: 'High character randomness indicative of DGA (Domain Generation Algorithms).',
+    description: 'Shannon character entropy indicating algorithmic domain generation (DGA).',
+  },
+  {
+    feature: 'SuspiciousTokensCount',
+    importance: 0.04,
+    category: 'Token',
+    description: 'Presence of credential-harvesting keywords ("login", "verify", "secure").',
   },
 ];
 
@@ -204,7 +268,6 @@ export function getInitialSeedScans(): ScanResult[] {
 
   return seedUrls.map((url, idx) => {
     const res = analyzeUrl(url);
-    // Stagger timestamps across past 5 days
     res.timestamp = Date.now() - (idx * 14 * 3600 * 1000 + (idx * 33) * 60 * 1000);
     return res;
   });

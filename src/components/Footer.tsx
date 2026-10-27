@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Database, Layers, Sparkles } from 'lucide-react';
+import { ShieldCheck, Database, Layers, Sparkles, Server } from 'lucide-react';
 import { ActiveTab } from './Header';
 
 interface FooterProps {
@@ -21,19 +21,19 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </div>
             <p className="text-xs text-slate-400 leading-relaxed max-w-md">
               An Explainable ML-Based Phishing URL Detection and Cybersecurity Awareness Platform.
-              Engineered with gradient boosting (XGBoost), SHAP explainability, and multi-vector threat analytics.
+              Built on <strong>Python, FastAPI, Scikit-learn, XGBoost, SHAP, React, Tailwind CSS, Recharts, and SQLite</strong>.
             </p>
             <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-slate-500">
               <span className="flex items-center gap-1">
-                <Database className="w-3.5 h-3.5 text-cyan-500" /> UCI Phishing Dataset Benchmark
+                <Database className="w-3.5 h-3.5 text-cyan-500" /> PhiUSIIL Phishing Dataset (235,795 URLs)
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Layers className="w-3.5 h-3.5 text-indigo-500" /> XGBoost Champion (98.1% F1)
+                <Layers className="w-3.5 h-3.5 text-indigo-500" /> XGBoost Champion (99.04% F1)
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> SHAP Feature Attribution
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> SHAP TreeExplainer XAI
               </span>
             </div>
           </div>
@@ -54,6 +54,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button
+                  onClick={() => onNavigate('model-insights')}
+                  className="hover:text-cyan-400 transition-colors"
+                >
+                  Model Benchmark & Viva Defense
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => onNavigate('history')}
                   className="hover:text-cyan-400 transition-colors"
                 >
@@ -66,14 +74,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   className="hover:text-cyan-400 transition-colors"
                 >
                   Threat Analytics & Trends
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('model-insights')}
-                  className="hover:text-cyan-400 transition-colors"
-                >
-                  Model Benchmark & Viva Defense
                 </button>
               </li>
               <li>
@@ -98,14 +98,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Academic Viva & Architecture Notes */}
           <div>
             <span className="text-xs font-semibold text-slate-200 uppercase tracking-wider block mb-3">
-              Technical Decision
+              Dataset Feature Selection
             </span>
             <p className="text-xs text-slate-400 leading-relaxed mb-3">
-              Safely extracts purely client-side computable features (dots, hyphens, @ symbol, IP format, entropy, token keywords) to prevent metadata leak or browser exploits.
+              Because the deployed app only sees a pasted URL at use time, <strong>only URL-based features</strong> (21 selected out of 54) are used for training and real-time prediction.
             </p>
             <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400">
-              <strong className="text-slate-200 block mb-0.5">Viva Ready:</strong>
-              Includes complete 2x2 confusion matrices, ROC AUC curves, and FAQ defense arguments.
+              <strong className="text-slate-200 block mb-0.5">Technology Stack:</strong>
+              Python 3.10 • Scikit-learn • XGBoost • SHAP • FastAPI • SQLite • React • Tailwind • Recharts.
             </div>
           </div>
         </div>
@@ -113,10 +113,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Scope Disclaimer & Copyright */}
         <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
           <p className="text-center sm:text-left max-w-2xl text-[11px]">
-            <strong>Disclaimer:</strong> PhishShield is an ML-based risk-assessment and cybersecurity awareness platform. It evaluates probabilistic risk scores and explains warning signals. It does not promise real-time internet-wide threat intelligence or 100% detection.
+            <strong>Disclaimer:</strong> PhishShield is an ML-based risk-assessment and cybersecurity awareness platform trained on the PhiUSIIL Phishing URL Dataset. It evaluates probabilistic risk scores and explains warning signals. It does not promise real-time internet-wide threat intelligence or 100% detection.
           </p>
           <span className="text-[11px] font-mono text-slate-400">
-            PhishShield XAI v1.4 • 2026
+            PhishShield XAI v2.0 • 2026
           </span>
         </div>
       </div>

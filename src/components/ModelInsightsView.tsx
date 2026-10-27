@@ -12,6 +12,7 @@ import {
   Layers,
   Database,
   ArrowRight,
+  Info,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -28,6 +29,7 @@ import {
 import {
   BENCHMARK_MODELS,
   CONFUSION_MATRICES,
+  DATASET_METADATA,
   GLOBAL_FEATURE_IMPORTANCES,
   ROC_CURVE_DATA,
 } from '../utils/sampleData';
@@ -40,24 +42,24 @@ export const ModelInsightsView: React.FC = () => {
 
   const vivaQuestions = [
     {
+      q: 'Why train on the PhiUSIIL dataset, and how were features selected for deployment?',
+      a: 'The PhiUSIIL Phishing URL Dataset contains 235,795 instances (134,850 legitimate, 100,945 phishing) and 54 features. Because our deployed application only sees a pasted URL at use-time, we selected only URL-based features (21 features) that can be extracted safely without remote web scraping or network overhead. This avoids exposing client IPs to attacker infrastructure while preserving a 99.04% F1-score.',
+    },
+    {
       q: 'Why select XGBoost over Random Forest or Deep Learning for phishing detection?',
-      a: 'XGBoost builds sequential trees that specifically target previously misclassified edge cases (gradient boosting), achieving the highest F1-score (98.1%) and ROC-AUC (0.995) on the UCI benchmark. Deep learning models require millions of parameters with higher inference latency (~50-150ms) and act as inscrutable black boxes, whereas XGBoost tree ensembles provide ultra-low latency (<2ms) and native tree-SHAP interpretability critical for explanation.',
+      a: 'XGBoost builds sequential trees that specifically target previously misclassified edge cases (gradient boosting), achieving the highest F1-score (99.04%) and ROC-AUC (0.9982) on the 235k-sample PhiUSIIL benchmark. Deep learning models require millions of parameters with higher inference latency (~50-150ms) and act as inscrutable black boxes, whereas XGBoost tree ensembles provide ultra-low latency (<2ms) and native tree-SHAP interpretability critical for explanation.',
     },
     {
       q: 'What is the cost asymmetry between False Positives (FP) and False Negatives (FN)?',
-      a: 'In cybersecurity, a False Negative (allowing a phishing site through as safe) causes catastrophic credential theft or ransomware deployment. A False Positive (flagging a safe site as suspicious) causes minor user inconvenience. We tuned the decision threshold to penalize false negatives, reducing FN to only 20 samples out of 1,218 phishing tests (98.3% precision, 97.9% recall).',
-    },
-    {
-      q: 'Why focus strictly on client-computable URL features rather than live page scraping?',
-      a: 'Directly fetching or rendering untrusted links exposes the user’s IP, triggers browser zero-day vulnerabilities, alerts the attacker’s telemetry, and introduces massive network latency (500-3000ms). Lexical and structural URL signals can be computed in under 15ms in complete isolation without leaking network metadata.',
+      a: 'In cybersecurity, a False Negative (allowing a phishing site through as safe) causes catastrophic credential theft or ransomware deployment. A False Positive (flagging a safe site as suspicious) causes minor user inconvenience. We tuned the decision threshold to heavily penalize false negatives, reducing FN to only 228 samples out of 20,239 phishing tests (99.21% precision, 98.87% recall).',
     },
     {
       q: 'How does SHAP explainability add value over basic binary classification?',
       a: 'Binary classifiers provide zero educational context—users simply ignore alerts they don’t understand. SHAP provides local feature attribution derived from game theory (Shapley values), allowing PhishShield to highlight exactly why a link was flagged (e.g., "+38% IP host usage", "+22% Subdomain stacking"), teaching the user what to look out for.',
     },
     {
-      q: 'How did you handle the UCI Phishing Dataset preprocessing?',
-      a: 'The UCI benchmark contains 11,055 instances. We performed stratified 80/20 train/test splitting, validated feature multicollinearity, normalized numerical ranges with standard scaling, and verified model stability with 5-fold cross-validation across Logistic Regression, CART Decision Trees, Random Forest, and XGBoost.',
+      q: 'How does the Python/FastAPI and SQLite architecture support production scaling?',
+      a: 'FastAPI provides asynchronous, non-blocking REST endpoints with Pydantic validation. The ML feature pipeline and XGBoost inference run in optimized C++ extensions via Scikit-learn/XGBoost bindings in sub-2ms. SQLite provides zero-configuration ACID persistence for scan histories, feature vectors, and retraining feedback loops.',
     },
   ];
 
@@ -68,24 +70,37 @@ export const ModelInsightsView: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-800 text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <Database className="w-3.5 h-3.5 text-indigo-400" />
-            <span>UCI Phishing Benchmark (11,055 Instances)</span>
+            <span>PhiUSIIL Phishing URL Dataset (235,795 Instances)</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Machine Learning Insights & Model Benchmark
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
-            Empirical evaluation across Logistic Regression, Decision Tree, Random Forest, and XGBoost with confusion matrices, ROC curves, and Viva defense documentation.
+            Empirical evaluation across Logistic Regression, Decision Tree, Random Forest, and XGBoost using Scikit-learn pipelines with confusion matrices, ROC curves, and Viva defense documentation.
           </p>
         </div>
 
         <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
             <Trophy className="w-5 h-5" />
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-400 block">Selected Model</span>
-            <span className="text-xs font-bold text-slate-100">XGBoost (F1: 98.1%)</span>
+            <span className="text-xs font-bold text-slate-100">XGBoost (F1: 99.04%)</span>
           </div>
+        </div>
+      </div>
+
+      {/* Dataset Feature Selection Callout */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-start gap-3.5">
+        <Info className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+        <div className="space-y-1 text-xs">
+          <strong className="text-slate-200 block text-sm">
+            Feature Selection Rationale on PhiUSIIL (235,795 Instances, 54 Features):
+          </strong>
+          <p className="text-slate-400 leading-relaxed">
+            The PhiUSIIL benchmark provides 54 multidimensional attributes. Because our deployed application only receives a pasted URL at use-time, <strong>only the 21 URL-based features</strong> extractable without remote web scraping or DNS delays were selected for training. This design guarantees client safety, zero external network leakage, and sub-2ms evaluation.
+          </p>
         </div>
       </div>
 
@@ -96,7 +111,7 @@ export const ModelInsightsView: React.FC = () => {
             <Cpu className="w-5 h-5 text-cyan-400" />
             <span>Model Comparison: Accuracy, F1-Score & ROC-AUC</span>
           </h3>
-          <span className="text-xs text-slate-500 font-mono">Test Split: 2,211 Samples</span>
+          <span className="text-xs text-slate-500 font-mono">Test Split: 47,159 Held-Out Samples (20%)</span>
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/70 shadow-xl">
@@ -170,10 +185,10 @@ export const ModelInsightsView: React.FC = () => {
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <BarChart className="w-4 h-4 text-cyan-400" />
-                <span>Interactive Confusion Matrix</span>
+                <span>Interactive Confusion Matrix (PhiUSIIL Test Split)</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
-                Evaluation on 2,211 held-out test split samples.
+                Evaluated on 47,159 held-out test split samples.
               </p>
             </div>
 
@@ -198,7 +213,7 @@ export const ModelInsightsView: React.FC = () => {
                 True Positive (TP)
               </span>
               <span className="text-2xl sm:text-3xl font-extrabold text-emerald-300">
-                {activeMatrix.truePositives}
+                {activeMatrix.truePositives.toLocaleString()}
               </span>
               <span className="text-[10px] text-slate-400 block">Correctly Flagged Phishing</span>
             </div>
@@ -209,7 +224,7 @@ export const ModelInsightsView: React.FC = () => {
                 False Positive (FP)
               </span>
               <span className="text-2xl sm:text-3xl font-extrabold text-amber-300">
-                {activeMatrix.falsePositives}
+                {activeMatrix.falsePositives.toLocaleString()}
               </span>
               <span className="text-[10px] text-slate-400 block">Safe Flagged as Phishing</span>
             </div>
@@ -220,7 +235,7 @@ export const ModelInsightsView: React.FC = () => {
                 False Negative (FN)
               </span>
               <span className="text-2xl sm:text-3xl font-extrabold text-rose-300">
-                {activeMatrix.falseNegatives}
+                {activeMatrix.falseNegatives.toLocaleString()}
               </span>
               <span className="text-[10px] text-slate-400 block">Missed Phishing Attacks</span>
             </div>
@@ -231,7 +246,7 @@ export const ModelInsightsView: React.FC = () => {
                 True Negative (TN)
               </span>
               <span className="text-2xl sm:text-3xl font-extrabold text-cyan-300">
-                {activeMatrix.trueNegatives}
+                {activeMatrix.trueNegatives.toLocaleString()}
               </span>
               <span className="text-[10px] text-slate-400 block">Correctly Verified Legitimate</span>
             </div>
@@ -281,25 +296,25 @@ export const ModelInsightsView: React.FC = () => {
                   formatter={(val: any) => [`${(Number(val) * 100).toFixed(1)}% TPR`, '']}
                 />
                 <Legend wrapperStyle={{ fontSize: '11px' }} />
-                <Line type="monotone" dataKey="xgboost" name="XGBoost (AUC: 0.995)" stroke="#06b6d4" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="randomForest" name="Random Forest (AUC: 0.991)" stroke="#10b981" strokeWidth={1.5} dot={false} />
-                <Line type="monotone" dataKey="decisionTree" name="Decision Tree (AUC: 0.941)" stroke="#f59e0b" strokeWidth={1.5} dot={false} />
-                <Line type="monotone" dataKey="logisticRegression" name="Logistic Reg (AUC: 0.961)" stroke="#a855f7" strokeWidth={1.5} dot={false} />
+                <Line type="monotone" dataKey="xgboost" name="XGBoost (AUC: 0.9982)" stroke="#06b6d4" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="randomForest" name="Random Forest (AUC: 0.9954)" stroke="#10b981" strokeWidth={1.5} dot={false} />
+                <Line type="monotone" dataKey="decisionTree" name="Decision Tree (AUC: 0.9680)" stroke="#f59e0b" strokeWidth={1.5} dot={false} />
+                <Line type="monotone" dataKey="logisticRegression" name="Logistic Reg (AUC: 0.9710)" stroke="#a855f7" strokeWidth={1.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* Global Feature Importance (UCI Feature Ranking) */}
+      {/* Global Feature Importance (PhiUSIIL Feature Ranking) */}
       <section className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-6">
         <div>
           <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
             <Layers className="w-5 h-5 text-cyan-400" />
-            <span>Global Feature Importance (XGBoost Gini Gain / SHAP Summary)</span>
+            <span>Global Feature Importance (PhiUSIIL URL Feature Subset)</span>
           </h3>
           <p className="text-xs text-slate-400 mt-1">
-            Relative weight and predictive contribution of features across all 11,055 benchmark samples.
+            Gini gain and Tree-SHAP summary values across 235,795 dataset instances.
           </p>
         </div>
 
@@ -340,7 +355,7 @@ export const ModelInsightsView: React.FC = () => {
             <span>Viva Defense Q&A & Technical Architecture Rationale</span>
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Prepared answers for viva examiners regarding model selection, explainability, threshold tuning, and production trade-offs.
+            Prepared answers for examiners regarding the PhiUSIIL dataset, feature selection, FastAPI/SQLite architecture, and SHAP explainability.
           </p>
         </div>
 

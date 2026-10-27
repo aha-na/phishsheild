@@ -38,7 +38,7 @@ export default function App() {
 
   const executeScan = (rawUrl: string) => {
     setIsScanning(true);
-    setScanStage('Extracting lexical tokens...');
+    setScanStage('Extracting PhiUSIIL URL-based features...');
 
     setTimeout(() => {
       setScanStage('Computing Shannon entropy & structural vector...');
